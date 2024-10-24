@@ -14,12 +14,14 @@ library(terra)
 # population in Montana throughout the year.
 
 # species list
-grassland_species <- c("Baird's Sparrow",
-                       "Bobolink",
-                       "Chestnut-collared Longspur",
-                       "Sprague's Pipit",
-                       "Upland Sandpiper",
-                       "Western Meadowlark")
+grassland_species <- c(
+  "Baird's Sparrow",
+  "Bobolink",
+  "Chestnut-collared Longspur",
+  "Sprague's Pipit",
+  "Upland Sandpiper",
+  "Western Meadowlark"
+)
 
 # Montana boundary polygon from Natural Earth
 # note: you could use any region here, e.g. a shapefile, read in using read_sf
@@ -35,7 +37,8 @@ for (species in grassland_species) {
   # download the data products for this species
   # only weekly 27km relative abundance, median and confidence limits
   ebirdst_download_status(species,
-                          pattern = "abundance_(median|lower|upper)_27km")
+    pattern = "abundance_(median|lower|upper)_27km"
+  )
 
   # load the median weekly relative abundance and lower/upper confidence limits
   abd_median <- load_raster(species, resolution = "27km")
@@ -51,18 +54,23 @@ for (species in grassland_species) {
   # estimate the proportion of population in Montana with confidence limits
   # note: you could also mask and sum here
   pop_median_region <- extract(pop_median, mt_boundary,
-                               fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
   pop_lower_region <- extract(pop_lower, mt_boundary,
-                              fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
   pop_upper_region <- extract(pop_upper, mt_boundary,
-                              fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
 
   # convert to a data frame in long format (one row per week)
-  chronology <- data.frame(species = species,
-                           week = as.Date(names(pop_median_region)),
-                           median = as.numeric(pop_median_region),
-                           lower = as.numeric(pop_lower_region),
-                           upper = as.numeric(pop_upper_region)) |>
+  chronology <- data.frame(
+    species = species,
+    week = as.Date(names(pop_median_region)),
+    median = as.numeric(pop_median_region),
+    lower = as.numeric(pop_lower_region),
+    upper = as.numeric(pop_upper_region)
+  ) |>
     bind_rows(chronology)
 }
 
@@ -75,10 +83,12 @@ ggplot(chronology) +
   scale_y_continuous(labels = scales::label_percent()) +
   scale_color_brewer(palette = "Set1") +
   scale_fill_brewer(palette = "Set1") +
-  labs(x = "Week",
-       y = "% of population in Montana",
-       title = "Migration chronologies for grassland birds in Montana",
-       color = NULL, fill = NULL) +
+  labs(
+    x = "Week",
+    y = "% of population in Montana",
+    title = "Migration chronologies for grassland birds in Montana",
+    color = NULL, fill = NULL
+  ) +
   theme(legend.position = "bottom")
 ggsave("chronology.png")
 
@@ -105,7 +115,7 @@ for (species in grassland_species) {
 # sum across species to calculate richness
 richness <- sum(rast(range_mt), na.rm = TRUE)
 # make a simple map
-png(filename="plot_2.png")
+png(filename = "plot_2.png")
 plot(richness, axes = FALSE)
 dev.off()
 
@@ -115,12 +125,14 @@ prop_pop_mt <- list()
 for (species in grassland_species) {
   # download seasonal abundance at 3km
   ebirdst_download_status(species,
-                          pattern = "proportion-population_seasonal_mean_3km")
+    pattern = "proportion-population_seasonal_mean_3km"
+  )
 
   # load breeding season proportion of population
   prop_pop <- load_raster(species,
-                          product = "proportion-population",
-                          period = "seasonal") |>
+    product = "proportion-population",
+    period = "seasonal"
+  ) |>
     subset("breeding")
   # crop and mask to Montana
   prop_pop_mt[[species]] <- mask(crop(prop_pop, mt_boundary), mt_boundary)
@@ -144,24 +156,32 @@ importance_proj <- trim(project(importance, "ESRI:102003"))
 mt_boundary_proj <- project(mt_boundary, "ESRI:102003")
 # basemap
 par(mar = c(0, 0, 0, 0))
-plot(mt_boundary_proj, col = "grey", axes = FALSE,
-     main = "Areas of importance for grassland birds in Montana")
+plot(mt_boundary_proj,
+  col = "grey", axes = FALSE,
+  main = "Areas of importance for grassland birds in Montana"
+)
 # add importance raster
 plot(importance_proj, legend = FALSE, add = TRUE)
 # add legend
-fields::image.plot(zlim = c(0, 1), legend.only = TRUE,
-                   col = viridis::viridis(100),
-                   breaks = seq(0, 1, length.out = 101),
-                   smallplot = c(0.15, 0.85, 0.12, 0.15),
-                   horizontal = TRUE,
-                   axis.args = list(at = c(0, 0.5, 1),
-                                    labels = c("Low", "Medium", "High"),
-                                    fg = "black", col.axis = "black",
-                                    cex.axis = 0.75, lwd.ticks = 0.5,
-                                    padj = -1.5),
-                   legend.args = list(text = "Relative Importance",
-                                      side = 3, col = "black",
-                                      cex = 1, line = 0))
+fields::image.plot(
+  zlim = c(0, 1), legend.only = TRUE,
+  col = viridis::viridis(100),
+  breaks = seq(0, 1, length.out = 101),
+  smallplot = c(0.15, 0.85, 0.12, 0.15),
+  horizontal = TRUE,
+  axis.args = list(
+    at = c(0, 0.5, 1),
+    labels = c("Low", "Medium", "High"),
+    fg = "black", col.axis = "black",
+    cex.axis = 0.75, lwd.ticks = 0.5,
+    padj = -1.5
+  ),
+  legend.args = list(
+    text = "Relative Importance",
+    side = 3, col = "black",
+    cex = 1, line = 0
+  )
+)
 
 
 # ├ Exercises ----
@@ -194,12 +214,14 @@ us_boundary <- ne_states(iso_a2 = "US") |>
 # proportion of the entire modeled population
 
 # species list
-grassland_species <- c("Baird's Sparrow",
-                       "Bobolink",
-                       "Chestnut-collared Longspur",
-                       "Sprague's Pipit",
-                       "Upland Sandpiper",
-                       "Western Meadowlark")
+grassland_species <- c(
+  "Baird's Sparrow",
+  "Bobolink",
+  "Chestnut-collared Longspur",
+  "Sprague's Pipit",
+  "Upland Sandpiper",
+  "Western Meadowlark"
+)
 
 # Montana boundary polygon from Natural Earth
 mt_boundary <- ne_states(iso_a2 = "US") |>
@@ -222,7 +244,8 @@ for (species in grassland_species) {
   # download the data products for this species
   # only weekly 27km relative abundance, median and confidence limits
   ebirdst_download_status(species,
-                          pattern = "abundance_(median|lower|upper)_27km")
+    pattern = "abundance_(median|lower|upper)_27km"
+  )
 
   # load the median weekly relative abundance and lower/upper confidence limits
   abd_median <- load_raster(species, resolution = "27km") |>
@@ -244,18 +267,23 @@ for (species in grassland_species) {
   # estimate the proportion of population in Montana with confidence limits
   # note: you could also mask and sum here
   pop_median_region <- extract(pop_median, mt_boundary,
-                               fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
   pop_lower_region <- extract(pop_lower, mt_boundary,
-                              fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
   pop_upper_region <- extract(pop_upper, mt_boundary,
-                              fun = sum, na.rm = TRUE, ID = FALSE)
+    fun = sum, na.rm = TRUE, ID = FALSE
+  )
 
   # convert to a data frame in long format (one row per week)
-  chronology <- data.frame(species = species,
-                           week = as.Date(names(pop_median_region)),
-                           median = as.numeric(pop_median_region),
-                           lower = as.numeric(pop_lower_region),
-                           upper = as.numeric(pop_upper_region)) |>
+  chronology <- data.frame(
+    species = species,
+    week = as.Date(names(pop_median_region)),
+    median = as.numeric(pop_median_region),
+    lower = as.numeric(pop_lower_region),
+    upper = as.numeric(pop_upper_region)
+  ) |>
     bind_rows(chronology)
 }
 
@@ -271,10 +299,12 @@ ggplot(chronology[complete.cases(chronology), ]) +
   scale_y_continuous(labels = scales::label_percent()) +
   scale_color_brewer(palette = "Set1") +
   scale_fill_brewer(palette = "Set1") +
-  labs(x = "Week",
-       y = "% of population in Montana",
-       title = "Migration chronologies for grassland birds in Montana",
-       color = NULL, fill = NULL) +
+  labs(
+    x = "Week",
+    y = "% of population in Montana",
+    title = "Migration chronologies for grassland birds in Montana",
+    color = NULL, fill = NULL
+  ) +
   theme(legend.position = "bottom")
 
 ggsave("chronologia-5-species.png")
@@ -287,12 +317,14 @@ ggsave("chronologia-5-species.png")
 # cutoff.
 
 # species list, note some are migrants and others are residents
-woodpecker_species <- c("Black-backed Woodpecker",
-                        "Downy Woodpecker",
-                        "Hairy Woodpecker",
-                        "Lewis's Woodpecker",
-                        "Northern Flicker",
-                        "White-headed Woodpecker")
+woodpecker_species <- c(
+  "Black-backed Woodpecker",
+  "Downy Woodpecker",
+  "Hairy Woodpecker",
+  "Lewis's Woodpecker",
+  "Northern Flicker",
+  "White-headed Woodpecker"
+)
 
 # Washington boundary polygon from Natural Earth
 wa_boundary <- ne_states(iso_a2 = "US") |>
@@ -306,7 +338,8 @@ prop_pop_wa <- list()
 for (species in woodpecker_species) {
   # download seasonal abundance at 3km
   ebirdst_download_status(species,
-                          pattern = "proportion-population_seasonal_mean_3km")
+    pattern = "proportion-population_seasonal_mean_3km"
+  )
 
   # check if this species is a resident
   is_resident <- filter(ebirdst_runs, common_name == species)[["is_resident"]]
@@ -319,8 +352,9 @@ for (species in woodpecker_species) {
     season_name <- "breeding"
   }
   prop_pop <- load_raster(species,
-                          product = "proportion-population",
-                          period = "seasonal") |>
+    product = "proportion-population",
+    period = "seasonal"
+  ) |>
     subset(season_name)
   # crop and mask to Washington
   prop_pop_wa[[species]] <- mask(crop(prop_pop, wa_boundary), wa_boundary)
@@ -340,24 +374,32 @@ importance_proj <- trim(project(importance, "ESRI:102003"))
 wa_boundary_proj <- project(wa_boundary, "ESRI:102003")
 # basemap
 par(mar = c(0, 0, 0, 0))
-png(filename="excercise_2.png")
-plot(wa_boundary_proj, col = "grey", axes = FALSE,
-     main = "Areas of importance for woodpeckers in Washington")
+png(filename = "excercise_2.png")
+plot(wa_boundary_proj,
+  col = "grey", axes = FALSE,
+  main = "Areas of importance for woodpeckers in Washington"
+)
 # add importance raster
 plot(importance_proj, legend = FALSE, add = TRUE)
 # add legend
-fields::image.plot(zlim = c(0, 1), legend.only = TRUE,
-                   col = viridis::viridis(100),
-                   breaks = seq(0, 1, length.out = 101),
-                   smallplot = c(0.15, 0.85, 0.12, 0.15),
-                   horizontal = TRUE,
-                   axis.args = list(at = c(0, 0.5, 1),
-                                    labels = c("Low", "Medium", "High"),
-                                    fg = "black", col.axis = "black",
-                                    cex.axis = 0.75, lwd.ticks = 0.5,
-                                    padj = -1.5),
-                   legend.args = list(text = "Relative Importance",
-                                      side = 3, col = "black",
-                                      cex = 1, line = 0))
+fields::image.plot(
+  zlim = c(0, 1), legend.only = TRUE,
+  col = viridis::viridis(100),
+  breaks = seq(0, 1, length.out = 101),
+  smallplot = c(0.15, 0.85, 0.12, 0.15),
+  horizontal = TRUE,
+  axis.args = list(
+    at = c(0, 0.5, 1),
+    labels = c("Low", "Medium", "High"),
+    fg = "black", col.axis = "black",
+    cex.axis = 0.75, lwd.ticks = 0.5,
+    padj = -1.5
+  ),
+  legend.args = list(
+    text = "Relative Importance",
+    side = 3, col = "black",
+    cex = 1, line = 0
+  )
+)
 
 dev.off()

@@ -32,12 +32,14 @@ abd_prj <- project(trim(abd), crs$wkt, method = "near")
 
 # get reference data from the rnaturalearth package
 # the example data currently shows only the US state of Michigan
-wh_states <- ne_states(country = c("United States of America", "Canada"),
-                       returnclass = "sf") %>% 
-  st_transform(crs = crs) %>% 
+wh_states <- ne_states(
+  country = c("United States of America", "Canada"),
+  returnclass = "sf"
+) %>%
+  st_transform(crs = crs) %>%
   st_geometry()
 
-png(filename="plot.png")
+png(filename = "plot.png")
 # start plotting
 par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
 
@@ -48,25 +50,33 @@ plot(bb, col = "white", border = "white")
 plot(wh_states, col = "#cfcfcf", border = NA, add = TRUE)
 
 # plot zeroes as light gray
-plot(abd_prj, col = "#e6e6e6", maxpixels = ncell(abd_prj),
-     axes = FALSE, legend = FALSE, add = TRUE)
+plot(abd_prj,
+  col = "#e6e6e6", maxpixels = ncell(abd_prj),
+  axes = FALSE, legend = FALSE, add = TRUE
+)
 
 # define color palette
 pal <- ebirdst_palettes(length(breaks) - 1, type = "weekly")
 # plot abundance
-plot(abd_prj, col = pal, breaks = breaks, maxpixels = ncell(abd_prj),
-     axes = FALSE, legend = FALSE, add = TRUE)
+plot(abd_prj,
+  col = pal, breaks = breaks, maxpixels = ncell(abd_prj),
+  axes = FALSE, legend = FALSE, add = TRUE
+)
 
 # state boundaries
 plot(wh_states, add = TRUE, col = NA, border = "white", lwd = 1.5)
 
 # legend
 label_breaks <- seq(0, 1, length.out = length(breaks))
-image.plot(zlim = c(0, 1), breaks = label_breaks, col = pal,
-           smallplot = c(0.90, 0.93, 0.15, 0.85),
-           legend.only = TRUE,
-           axis.args = list(at = c(0, 0.5, 1), 
-                            labels = round(labels, 2),
-                            cex.axis = 0.9, lwd.ticks = 0))
+image.plot(
+  zlim = c(0, 1), breaks = label_breaks, col = pal,
+  smallplot = c(0.90, 0.93, 0.15, 0.85),
+  legend.only = TRUE,
+  axis.args = list(
+    at = c(0, 0.5, 1),
+    labels = round(labels, 2),
+    cex.axis = 0.9, lwd.ticks = 0
+  )
+)
 
 dev.off()
