@@ -16,6 +16,7 @@ all: check coverage
 check:
 	R -e "library(styler)" \
       -e "resumen <- style_dir('R')" \
+      -e "resumen <- style_dir('src')" \
       -e "resumen <- rbind(resumen, style_dir('tests'))" \
       -e "resumen <- rbind(resumen, style_dir('tests/testthat'))" \
       -e "any(resumen[[2]])" \
@@ -32,6 +33,7 @@ coverage: setup tests
 format:
 	R -e "library(styler)" \
       -e "style_dir('R')" \
+      -e "style_dir('src')" \
       -e "style_dir('tests')" \
       -e "style_dir('tests/testthat')"
 
