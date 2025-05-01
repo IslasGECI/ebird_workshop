@@ -4,6 +4,8 @@ library(sf)
 library(terra)
 library(ebirdst)
 
+# set_ebirdst_access_key("XXXX")
+
 # download example data, yellow-bellied sapsucker in michigan
 ebirdst_download_status(species = "yebsap-example")
 
